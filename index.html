@@ -1,0 +1,780 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pour Rere 💗</title>
+<style>
+*{box-sizing:border-box}
+:root{--pink:#ff75ad;--light-pink:#fff0f6;--dark-pink:#c83f7c;--purple:#a68af9}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;color:#743c61;background:linear-gradient(145deg,#fff0f6,#f4edff);text-align:center;overflow-x:hidden}
+button{font:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button:disabled{opacity:.55;cursor:not-allowed}
+.screen{display:none;width:100%;max-width:650px;min-height:100vh;margin:auto;padding:24px 16px 35px}
+.screen.active{display:block}
+h1{color:#e65391;font-size:clamp(28px,7vw,43px);margin:15px 0}
+h2{color:#d34f8d}
+p{line-height:1.6}
+.card{background:rgba(255,255,255,.88);border:2px solid #ffd0e3;border-radius:24px;padding:20px;margin:18px 0;box-shadow:0 8px 25px #e5a9c52b}
+.big-heart{font-size:90px;animation:heartbeat 1.2s infinite}
+@keyframes heartbeat{50%{transform:scale(1.09)}}
+.primary,.secondary,.game-button{border:none;border-radius:16px;padding:14px 19px;margin:6px;font-weight:bold;transition:transform .12s}
+.primary{background:linear-gradient(135deg,#ff83b7,#f35c9d);color:white;box-shadow:0 5px 0 #d74686}
+.secondary{background:#f0eaff;color:#7754bc;border:1px solid #d9caff}
+.primary:active,.secondary:active,.game-button:active{transform:scale(.96)}
+.game-button{display:block;width:100%;min-height:78px;text-align:left;background:white;border:2px solid #ffd4e6;color:#88466c;font-size:16px}
+.game-button span{display:block;font-size:27px;margin-bottom:5px}
+.small{font-size:13px;opacity:.8}
+.progress-outer{height:15px;background:#f7d9e7;border-radius:30px;overflow:hidden;margin:12px 0}
+#progressBar{height:100%;width:0;background:linear-gradient(90deg,#ff79b0,#bba0ff);transition:width .3s}
+#questCanvas{width:100%;max-width:520px;display:block;margin:12px auto;border-radius:18px;border:3px solid white;background:#d8f5ff;touch-action:none}
+.control-row{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:10px 0}
+.control{min-width:75px;min-height:54px;border:2px solid #ffc4dc;border-radius:15px;background:white;color:#bf4381;font-size:23px;font-weight:bold;user-select:none;-webkit-user-select:none}
+#jumpButton{background:#ff83b7;color:white;min-width:105px}
+#questStatus{font-weight:bold;min-height:25px}
+#memoryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:380px;margin:20px auto}
+.memory-card{aspect-ratio:1;border:2px solid #ffc8df;border-radius:17px;background:white;color:#d44e8c;font-size:clamp(25px,8vw,40px);min-width:0}
+.memory-card.matched{background:#e8ffef;border-color:#8bdbab}
+#garden{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:390px;margin:20px auto}
+.flower{aspect-ratio:1;border-radius:20px;border:2px solid #f9c5df;background:white;font-size:36px}
+.flower.grown{background:#eaffec;border-color:#9cdaa6}
+#letterText{text-align:left;white-space:pre-line;line-height:1.9;font-size:16px}
+.sparkle{position:fixed;pointer-events:none;animation:floatUp 3s linear forwards;z-index:5}
+@keyframes floatUp{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(-100vh) rotate(250deg);opacity:0}}
+.hidden{display:none!important}
+footer{margin-top:30px;font-size:12px;opacity:.65}
+</style>
+</head>
+<body>
+
+<section id="welcome" class="screen active">
+<div class="big-heart">💗</div>
+<h1>Pour Rere</h1>
+<p>Un petit monde rien que pour toi.</p>
+<div class="card">
+<p>Trois petites aventures, un jardin de fleurs et un message venant du cœur.</p>
+<p>Prends ton temps. Il n'y a aucune urgence. 🌷</p>
+</div>
+<button class="primary" id="startButton">Entrer dans notre petit monde ✨</button>
+</section>
+
+<section id="menu" class="screen">
+<h1>Notre petit monde 🌸</h1>
+<p>Termine les trois petits jeux pour débloquer ta lettre.</p>
+<div class="card">
+<strong id="progressText">0 jeu sur 3 terminé</strong>
+<div class="progress-outer"><div id="progressBar"></div></div>
+<p id="progressMessage">Ton aventure t'attend 💗</p>
+</div>
+
+<button class="game-button" id="openQuest">
+<span>⚔️ 💎</span>
+<strong>1. La quête du cœur de Rere</strong><br>
+<small>Saute par-dessus les épines et récupère les cristaux de cœur.</small>
+<div class="small" id="questDone">Pas encore terminé</div>
+</button>
+
+<button class="game-button" id="openMemory">
+<span>🃏 💕</span>
+<strong>2. Nos souvenirs</strong><br>
+<small>Retrouve les trois paires identiques.</small>
+<div class="small" id="memoryDone">Pas encore terminé</div>
+</button>
+
+<button class="game-button" id="openGarden">
+<span>🌱 🌷</span>
+<strong>3. Un jardin pour Rere</strong><br>
+<small>Fais pousser six petites fleurs.</small>
+<div class="small" id="gardenDone">Pas encore terminé</div>
+</button>
+
+<div class="card">
+<h2>💌 Une petite lettre</h2>
+<p id="letterHint">Termine les trois jeux pour la débloquer.</p>
+<button class="primary" id="openLetter" disabled>Ouvrir ma lettre 💌</button>
+</div>
+</section>
+
+<section id="questScreen" class="screen">
+<h1>La quête du cœur de Rere 💎</h1>
+<p>Récupère 8 cœurs et atteins la porte rose. Évite les épines !</p>
+<div class="card">
+<strong id="heartCount">Cœurs : 0 / 8</strong>
+<p id="questStatus">Utilise les boutons pour bouger et sauter.</p>
+<canvas id="questCanvas" width="480" height="280"></canvas>
+<div class="control-row">
+<button class="control" id="leftButton" aria-label="Aller à gauche">◀</button>
+<button class="control" id="rightButton" aria-label="Aller à droite">▶</button>
+<button class="control" id="jumpButton">SAUTER ⬆</button>
+</div>
+<p class="small">Tu peux aussi utiliser les flèches du clavier et la barre d'espace.</p>
+<button class="secondary" id="restartQuest">Recommencer ↻</button>
+<button class="secondary" id="questBack">Retour au menu</button>
+</div>
+</section>
+
+<section id="memoryScreen" class="screen">
+<h1>Nos souvenirs 🃏</h1>
+<p>Retrouve les trois paires identiques.</p>
+<div class="card">
+<p id="memoryStatus">Trouve les paires identiques ! 💗</p>
+<div id="memoryGrid"></div>
+<button class="secondary" id="resetMemory">Rejouer ↻</button>
+<button class="secondary" id="memoryBack">Retour au menu</button>
+</div>
+</section>
+
+<section id="gardenScreen" class="screen">
+<h1>Un jardin pour Rere 🌷</h1>
+<p>Touche les petits bourgeons pour faire pousser ton jardin.</p>
+<div class="card">
+<p id="gardenStatus">Fleurs poussées : 0 / 6</p>
+<div id="garden"></div>
+<button class="secondary" id="resetGarden">Recommencer le jardin ↻</button>
+<button class="secondary" id="gardenBack">Retour au menu</button>
+</div>
+</section>
+
+<section id="letterScreen" class="screen">
+<div class="big-heart">💌</div>
+<h1>Une lettre pour Rere</h1>
+<div class="card">
+<div id="letterText">Chère Rere,
+
+Je suis désolé de t'avoir blessée. Je sais que dire pardon ne répare pas automatiquement les choses, et je ne veux pas faire comme si c'était le cas.
+
+Tes sentiments comptent, et j'aurais dû faire davantage attention à la façon dont mes paroles et mes actions pouvaient t'affecter.
+
+Tu comptes pour moi, et je suis désolé pour le rôle que j'ai joué dans ta peine. Je veux apprendre de cette situation et faire mieux, pas seulement dire les bons mots.
+
+Tu n'es pas obligée de me pardonner tout de suite ni de répondre d'une manière particulière. Je voulais simplement créer quelque chose pour toi et te faire savoir que je suis sincèrement désolé.
+
+Tu mérites de la gentillesse, de l'honnêteté et du respect.
+
+Je suis désolé, Rere. 💗
+
+— Quelqu'un qui veut faire mieux</div>
+</div>
+<p>Merci d'avoir exploré ce petit monde. 🌷</p>
+<button class="primary" id="surpriseButton">Une petite surprise ✨</button>
+<button class="secondary" id="letterBack">Retour au menu</button>
+<p id="surpriseMessage"></p>
+</section>
+
+<footer>Créé avec attention 💗</footer>
+
+<script>
+"use strict";
+
+/* NAVIGATION */
+
+const screens = document.querySelectorAll(".screen");
+
+const completed = {
+  quest: false,
+  memory: false,
+  garden: false
+};
+
+let catchTimer = null;
+let spawnTimer = null;
+let catchRunning = false;
+
+function showScreen(id) {
+  screens.forEach(screen => screen.classList.remove("active"));
+
+  const target = document.getElementById(id);
+  if (target) target.classList.add("active");
+
+  if (id !== "questScreen") {
+    stopQuest();
+    stopCatch();
+  }
+
+  if (id === "questScreen" && !quest.won) startQuest();
+}
+
+function updateProgress() {
+  const count = Object.values(completed).filter(Boolean).length;
+
+  document.getElementById("progressText").textContent =
+    count + " jeu(x) sur 3 terminé(s)";
+
+  document.getElementById("progressBar").style.width =
+    (count / 3 * 100) + "%";
+
+  document.getElementById("questDone").textContent =
+    completed.quest ? "✅ Terminé !" : "Pas encore terminé";
+
+  document.getElementById("memoryDone").textContent =
+    completed.memory ? "✅ Terminé !" : "Pas encore terminé";
+
+  document.getElementById("gardenDone").textContent =
+    completed.garden ? "✅ Terminé !" : "Pas encore terminé";
+
+  document.getElementById("openLetter").disabled = count !== 3;
+
+  document.getElementById("letterHint").textContent =
+    count === 3
+      ? "Bravo ! Ta lettre est prête. 💌"
+      : "Termine les trois jeux pour la débloquer.";
+
+  document.getElementById("progressMessage").textContent =
+    count === 3
+      ? "Toutes les aventures sont terminées ! 💖"
+      : "Continue ! Tu te débrouilles très bien. 🌸";
+}
+
+document.getElementById("startButton").addEventListener("click", () => showScreen("menu"));
+
+document.getElementById("openQuest").addEventListener("click", () => {
+  resetQuest();
+  showScreen("questScreen");
+});
+
+document.getElementById("openMemory").addEventListener("click", () => {
+  resetMemory();
+  showScreen("memoryScreen");
+});
+
+document.getElementById("openGarden").addEventListener("click", () => {
+  resetGarden();
+  showScreen("gardenScreen");
+});
+
+document.getElementById("openLetter").addEventListener("click", () => {
+  if (Object.values(completed).every(Boolean)) showScreen("letterScreen");
+});
+
+document.getElementById("questBack").addEventListener("click", () => showScreen("menu"));
+document.getElementById("memoryBack").addEventListener("click", () => showScreen("menu"));
+document.getElementById("gardenBack").addEventListener("click", () => showScreen("menu"));
+document.getElementById("letterBack").addEventListener("click", () => showScreen("menu"));
+
+/* GAME 1: QUÊTE DU CŒUR */
+
+const canvas = document.getElementById("questCanvas");
+const ctx = canvas.getContext("2d");
+
+const WORLD_WIDTH = 1900;
+const GROUND = 225;
+
+const heartLocations = [
+  {x:170,y:170},{x:345,y:135},{x:525,y:170},{x:735,y:135},
+  {x:940,y:170},{x:1150,y:135},{x:1370,y:170},{x:1580,y:145}
+];
+
+const thornLocations = [
+  {x:255,w:35},{x:430,w:35},{x:630,w:40},{x:845,w:35},
+  {x:1040,w:40},{x:1260,w:35},{x:1470,w:40}
+];
+
+let quest = {};
+let questFrame = null;
+let lastFrame = 0;
+
+function resetQuest() {
+  stopQuest();
+
+  quest = {
+    x:35,y:GROUND-32,w:25,h:32,
+    vx:0,vy:0,onGround:true,camera:0,
+    hearts:heartLocations.map((heart,i)=>({
+      x:heart.x,y:heart.y,taken:false,id:i
+    })),
+    keys:{left:false,right:false},
+    won:false,running:false,invulnerable:0
+  };
+
+  document.getElementById("heartCount").textContent = "Cœurs : 0 / 8";
+  document.getElementById("questStatus").textContent =
+    "Récupère tous les cœurs et trouve la porte !";
+
+  renderQuest();
+}
+
+function startQuest() {
+  if (!quest || quest.won || quest.running) return;
+  quest.running = true;
+  lastFrame = 0;
+  questFrame = requestAnimationFrame(questLoop);
+}
+
+function stopQuest() {
+  if (questFrame !== null) cancelAnimationFrame(questFrame);
+  questFrame = null;
+
+  if (quest && quest.keys) {
+    quest.keys.left = false;
+    quest.keys.right = false;
+  }
+
+  if (quest) quest.running = false;
+}
+
+function stopCatch() {
+  if (catchTimer !== null) {
+    clearInterval(catchTimer);
+    catchTimer = null;
+  }
+
+  if (spawnTimer !== null) {
+    clearTimeout(spawnTimer);
+    spawnTimer = null;
+  }
+
+  catchRunning = false;
+}
+
+function questLoop(timestamp) {
+  if (!quest.running ||
+      !document.getElementById("questScreen").classList.contains("active")) {
+    quest.running = false;
+    questFrame = null;
+    return;
+  }
+
+  const dt = lastFrame ? Math.min((timestamp-lastFrame)/16.67,2) : 1;
+  lastFrame = timestamp;
+
+  updateQuest(dt);
+  renderQuest();
+
+  if (quest.running) questFrame = requestAnimationFrame(questLoop);
+  else questFrame = null;
+}
+
+function updateQuest(dt) {
+  const speed = 3.2;
+
+  quest.vx = 0;
+  if (quest.keys.left) quest.vx = -speed;
+  if (quest.keys.right) quest.vx = speed;
+
+  quest.x += quest.vx * dt;
+  quest.x = Math.max(0,Math.min(WORLD_WIDTH-quest.w,quest.x));
+
+  quest.vy += .48*dt;
+  quest.y += quest.vy*dt;
+
+  if (quest.y+quest.h >= GROUND) {
+    quest.y = GROUND-quest.h;
+    quest.vy = 0;
+    quest.onGround = true;
+  }
+
+  if (quest.invulnerable > 0) quest.invulnerable -= dt;
+
+  quest.hearts.forEach(heart => {
+    if (heart.taken) return;
+
+    const dx = quest.x+quest.w/2-heart.x;
+    const dy = quest.y+quest.h/2-heart.y;
+
+    if (Math.hypot(dx,dy)<29) {
+      heart.taken = true;
+      const count = quest.hearts.filter(h=>h.taken).length;
+
+      document.getElementById("heartCount").textContent =
+        "Cœurs : "+count+" / 8";
+
+      document.getElementById("questStatus").textContent =
+        "Tu as trouvé un cœur ! 💗";
+    }
+  });
+
+  if (quest.invulnerable <= 0) {
+    for (const thorn of thornLocations) {
+      if (
+        quest.x+quest.w > thorn.x &&
+        quest.x < thorn.x+thorn.w &&
+        quest.y+quest.h > GROUND-20 &&
+        quest.y < GROUND
+      ) {
+        quest.x = Math.max(0,quest.x-55);
+        quest.y = GROUND-quest.h;
+        quest.vy = 0;
+        quest.invulnerable = 40;
+
+        document.getElementById("questStatus").textContent =
+          "Attention ! Saute par-dessus les épines. 🌵";
+        break;
+      }
+    }
+  }
+
+  if (quest.x > WORLD_WIDTH-110) {
+    if (quest.hearts.every(h=>h.taken)) {
+      finishQuest();
+    } else {
+      quest.x = WORLD_WIDTH-150;
+      document.getElementById("questStatus").textContent =
+        "La porte a besoin des 8 cœurs ! 💎";
+    }
+  }
+
+  quest.camera = Math.max(0,Math.min(
+    WORLD_WIDTH-canvas.width,quest.x-150
+  ));
+}
+
+function drawHeart(x,y,size,color) {
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(size/20,size/20);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(0,7);
+  ctx.bezierCurveTo(-22,-7,-11,-20,0,-9);
+  ctx.bezierCurveTo(11,-20,22,-7,0,7);
+  ctx.fill();
+  ctx.restore();
+}
+
+function renderQuest() {
+  if (!ctx || !quest || !quest.hearts) return;
+
+  const camera = quest.camera || 0;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const sky = ctx.createLinearGradient(0,0,0,canvas.height);
+  sky.addColorStop(0,"#dff6ff");
+  sky.addColorStop(1,"#fff0f8");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle = "#ffffff";
+
+  for (let i=0;i<7;i++) {
+    const x = ((i*100-camera*.25)%650+650)%650-30;
+    const y = 35+(i%3)*20;
+
+    ctx.beginPath();
+    ctx.arc(x,y,17,0,Math.PI*2);
+    ctx.arc(x+18,y-8,20,0,Math.PI*2);
+    ctx.arc(x+39,y,15,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = "#b7e8a4";
+  ctx.fillRect(0,GROUND,canvas.width,canvas.height-GROUND);
+  ctx.fillStyle = "#7ecb83";
+  ctx.fillRect(0,GROUND,canvas.width,8);
+
+  thornLocations.forEach(thorn=>{
+    const x = thorn.x-camera;
+    if (x < -50 || x > canvas.width+50) return;
+
+    ctx.fillStyle = "#8e76bd";
+    ctx.beginPath();
+    ctx.moveTo(x,GROUND);
+    ctx.lineTo(x+thorn.w/2,GROUND-24);
+    ctx.lineTo(x+thorn.w,GROUND);
+    ctx.fill();
+  });
+
+  quest.hearts.forEach(heart=>{
+    if (heart.taken) return;
+    const x = heart.x-camera;
+    if (x < -30 || x > canvas.width+30) return;
+    drawHeart(x,heart.y,23,"#ff579a");
+  });
+
+  const gateX = WORLD_WIDTH-75-camera;
+  ctx.fillStyle = "#d58cdd";
+  ctx.fillRect(gateX,GROUND-75,45,75);
+  ctx.fillStyle = "#fff4fd";
+  ctx.fillRect(gateX+9,GROUND-64,27,64);
+  drawHeart(gateX+22,GROUND-40,20,"#ff6fae");
+
+  const px = quest.x-camera;
+  const py = quest.y;
+
+  ctx.fillStyle = "#e76aab";
+  ctx.beginPath();
+  ctx.arc(px+12,py+9,10,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(px+9,py+8,2,0,Math.PI*2);
+  ctx.arc(px+16,py+8,2,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = "#d74a8c";
+  ctx.fillRect(px+3,py+18,19,13);
+
+  ctx.fillStyle = "#8a5c83";
+  ctx.font = "12px Arial";
+  ctx.fillText("QUÊTE DU CŒUR",12,18);
+}
+
+function jumpQuest() {
+  if (!quest || quest.won || !quest.running) return;
+
+  if (quest.onGround) {
+    quest.vy = -9.2;
+    quest.onGround = false;
+  }
+}
+
+function finishQuest() {
+  if (quest.won) return;
+
+  quest.won = true;
+  quest.running = false;
+  completed.quest = true;
+  updateProgress();
+
+  document.getElementById("questStatus").textContent =
+    "Bravo ! La porte est ouverte ! 💗✨";
+
+  setTimeout(()=>{
+    if (document.getElementById("questScreen").classList.contains("active")) {
+      alert("Bravo ! Tu as récupéré tous les cœurs ! 💗");
+    }
+  },80);
+}
+
+function bindHoldButton(id,key) {
+  const button = document.getElementById(id);
+
+  const down = event=>{
+    event.preventDefault();
+    if (!quest.running || quest.won) return;
+    quest.keys[key] = true;
+  };
+
+  const up = event=>{
+    event.preventDefault();
+    if (quest && quest.keys) quest.keys[key] = false;
+  };
+
+  button.addEventListener("pointerdown",down);
+  button.addEventListener("pointerup",up);
+  button.addEventListener("pointercancel",up);
+  button.addEventListener("lostpointercapture",up);
+  button.addEventListener("contextmenu",event=>event.preventDefault());
+}
+
+bindHoldButton("leftButton","left");
+bindHoldButton("rightButton","right");
+
+document.getElementById("jumpButton").addEventListener("pointerdown",event=>{
+  event.preventDefault();
+  jumpQuest();
+});
+
+document.getElementById("restartQuest").addEventListener("click",()=>{
+  resetQuest();
+  startQuest();
+});
+
+document.addEventListener("keydown",event=>{
+  if (!document.getElementById("questScreen").classList.contains("active")) return;
+
+  if (["ArrowLeft","ArrowRight","ArrowUp"," "].includes(event.key)) {
+    event.preventDefault();
+  }
+
+  if (event.key==="ArrowLeft") quest.keys.left=true;
+  if (event.key==="ArrowRight") quest.keys.right=true;
+  if (event.key===" " || event.key==="ArrowUp") jumpQuest();
+});
+
+document.addEventListener("keyup",event=>{
+  if (!quest || !quest.keys) return;
+  if (event.key==="ArrowLeft") quest.keys.left=false;
+  if (event.key==="ArrowRight") quest.keys.right=false;
+});
+
+/* GAME 2 : MÉMOIRE */
+
+const memorySymbols = ["💗","🌷","🧸"];
+let memoryCards = [];
+let firstCard = null;
+let secondCard = null;
+let memoryLocked = false;
+let memoryMatches = 0;
+
+function resetMemory() {
+  memoryCards = [...memorySymbols,...memorySymbols]
+    .map((symbol,index)=>({
+      symbol,id:index,matched:false,revealed:false
+    }))
+    .sort(()=>Math.random()-.5);
+
+  firstCard = null;
+  secondCard = null;
+  memoryLocked = false;
+  memoryMatches = 0;
+
+  document.getElementById("memoryStatus").textContent =
+    "Trouve les trois paires ! 💕";
+
+  renderMemory();
+}
+
+function renderMemory() {
+  const grid = document.getElementById("memoryGrid");
+  grid.innerHTML = "";
+
+  memoryCards.forEach(card=>{
+    const button = document.createElement("button");
+    button.className = "memory-card";
+    button.type = "button";
+    button.textContent =
+      card.matched || card.revealed ? card.symbol : "❔";
+    button.setAttribute("aria-label","Carte de mémoire");
+
+    if (card.matched) button.classList.add("matched");
+
+    button.disabled = card.matched || card.revealed || memoryLocked;
+    button.addEventListener("click",()=>flipCard(card.id));
+    grid.appendChild(button);
+  });
+}
+
+function flipCard(id) {
+  if (memoryLocked) return;
+
+  const card = memoryCards.find(item=>item.id===id);
+  if (!card || card.matched || card.revealed) return;
+
+  card.revealed = true;
+
+  if (!firstCard) {
+    firstCard = card;
+    renderMemory();
+    return;
+  }
+
+  secondCard = card;
+  memoryLocked = true;
+  renderMemory();
+
+  if (firstCard.symbol===secondCard.symbol) {
+    firstCard.matched = true;
+    secondCard.matched = true;
+    memoryMatches++;
+
+    firstCard = null;
+    secondCard = null;
+    memoryLocked = false;
+
+    document.getElementById("memoryStatus").textContent =
+      "Une paire trouvée ! 💗";
+
+    renderMemory();
+
+    if (memoryMatches===3) {
+      completed.memory = true;
+      updateProgress();
+      document.getElementById("memoryStatus").textContent =
+        "Toutes les paires sont trouvées ! 🎉";
+    }
+  } else {
+    const previousFirst = firstCard;
+    const previousSecond = secondCard;
+
+    setTimeout(()=>{
+      previousFirst.revealed = false;
+      previousSecond.revealed = false;
+      firstCard = null;
+      secondCard = null;
+      memoryLocked = false;
+      renderMemory();
+
+      document.getElementById("memoryStatus").textContent =
+        "Essaie une autre paire ! 🌷";
+    },750);
+  }
+}
+
+document.getElementById("resetMemory").addEventListener("click",resetMemory);
+
+/* GAME 3 : JARDIN */
+
+let gardenCount = 0;
+let gardenGrown = [];
+
+function resetGarden() {
+  gardenCount = 0;
+  gardenGrown = Array(6).fill(false);
+
+  document.getElementById("gardenStatus").textContent =
+    "Fleurs poussées : 0 / 6";
+
+  const garden = document.getElementById("garden");
+  garden.innerHTML = "";
+
+  for (let i=0;i<6;i++) {
+    const button = document.createElement("button");
+    button.className = "flower";
+    button.type = "button";
+    button.textContent = "🌱";
+    button.setAttribute("aria-label","Faire pousser une fleur");
+
+    button.addEventListener("click",()=>growFlower(i,button));
+    garden.appendChild(button);
+  }
+}
+
+function growFlower(index,button) {
+  if (gardenGrown[index]) return;
+
+  gardenGrown[index] = true;
+  gardenCount++;
+
+  const flowers = ["🌷","🌸","🌼","🌹","🌺","💐"];
+  button.textContent = flowers[index];
+  button.classList.add("grown");
+  button.disabled = true;
+
+  document.getElementById("gardenStatus").textContent =
+    "Fleurs poussées : "+gardenCount+" / 6";
+
+  if (gardenCount===6) {
+    completed.garden = true;
+    updateProgress();
+
+    document.getElementById("gardenStatus").textContent =
+      "Ton jardin est en fleurs ! 🌷💗";
+  }
+}
+
+document.getElementById("resetGarden").addEventListener("click",resetGarden);
+
+/* SURPRISE */
+
+document.getElementById("surpriseButton").addEventListener("click",()=>{
+  document.getElementById("surpriseMessage").textContent =
+    "🌷 Tu mérites de la gentillesse, de l'honnêteté et du bonheur. Voici un petit bouquet virtuel ! 💗";
+
+  for (let i=0;i<24;i++) {
+    setTimeout(()=>{
+      const sparkle = document.createElement("div");
+      sparkle.className = "sparkle";
+      sparkle.textContent =
+        ["💗","🌸","✨","🌷"][Math.floor(Math.random()*4)];
+
+      sparkle.style.left = Math.random()*100+"vw";
+      sparkle.style.top = (65+Math.random()*30)+"vh";
+      sparkle.style.fontSize = (18+Math.random()*20)+"px";
+
+      document.body.appendChild(sparkle);
+      setTimeout(()=>sparkle.remove(),3000);
+    },i*90);
+  }
+});
+
+/* INITIALISATION */
+
+resetQuest();
+resetMemory();
+resetGarden();
+updateProgress();
+</script>
+</body>
+</html>
